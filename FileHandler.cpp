@@ -680,4 +680,3 @@ int FileHandler::ParseStandInt(const std::string& value) {
 
 } // namespace OutfitConverter
 
-} // namespace OutfitConverter
