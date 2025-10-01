@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "UIManager.h"
+#include "ControlIDs.h"
 #include <sstream>
 #include <codecvt>
 #include <locale>
