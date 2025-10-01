@@ -1,5 +1,10 @@
 #include "FormatConverter.h"
 #include <algorithm>
+#include "FormatConverter.h"
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+
 
 namespace OutfitConverter {
 
