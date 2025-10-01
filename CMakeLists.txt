@@ -94,15 +94,6 @@ install(TARGETS OutfitConverter
     RUNTIME DESTINATION bin
 )
 
-# Create resource file (optional)
-if(WIN32)
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/resource.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/resource.rc
-        @ONLY
-    )
-endif()
-
 # Print build information
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
