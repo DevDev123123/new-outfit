@@ -1,10 +1,14 @@
 #include "UIManager.h"
+#include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#include <commdlg.h>  // <-- THIS WAS MISSING
 #include <sstream>
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "comdlg32.lib")  // <-- ADD THIS
+
 
 namespace OutfitConverter {
 namespace UI {
