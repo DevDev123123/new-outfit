@@ -3,11 +3,63 @@
 #include "MemoryEditor.h"
 #include "FormatConverter.h"
 #include "FileHandler.h"
-#include "UIManager.h"
 #include <memory>
 #include <string>
+#include <windows.h>
 
 namespace OutfitConverter {
+
+    // Forward declare UI manager
+    namespace UI {
+        class WindowManager;
+    }
+
+    // ============== CONTROL IDS ==============
+    #define ID_FILE_OPEN 1001
+    #define ID_FILE_SAVE 1002
+    #define ID_FILE_EXIT 1003
+    #define ID_CONVERT_CHERAX_TO_YIM 1010
+    #define ID_CONVERT_CHERAX_TO_LEXIS 1011
+    #define ID_CONVERT_CHERAX_TO_STAND 1012
+    #define ID_CONVERT_YIM_TO_CHERAX 1013
+    #define ID_CONVERT_YIM_TO_LEXIS 1014
+    #define ID_CONVERT_YIM_TO_STAND 1015
+    #define ID_CONVERT_LEXIS_TO_CHERAX 1016
+    #define ID_CONVERT_LEXIS_TO_YIM 1017
+    #define ID_CONVERT_LEXIS_TO_STAND 1018
+    #define ID_CONVERT_STAND_TO_CHERAX 1019
+    #define ID_CONVERT_STAND_TO_YIM 1020
+    #define ID_CONVERT_STAND_TO_LEXIS 1021
+    #define ID_EDITOR_OPEN 1030
+    #define ID_MEMORY_ATTACH 1040
+    #define ID_MEMORY_READ 1041
+    #define ID_MEMORY_WRITE 1042
+    #define ID_HELP_ABOUT 1050
+    #define ID_BTN_LOAD_FILE 2001
+    #define ID_BTN_SAVE_FILE 2002
+    #define ID_BTN_CONVERT 2003
+    #define ID_BTN_CLEAR 2004
+    #define ID_COMBO_SOURCE_FORMAT 2010
+    #define ID_COMBO_TARGET_FORMAT 2011
+    #define ID_EDIT_SOURCE_PATH 2020
+    #define ID_EDIT_TARGET_PATH 2021
+    #define ID_BTN_BROWSE_SOURCE 2022
+    #define ID_BTN_BROWSE_TARGET 2023
+    #define ID_LIST_COMPONENTS 2030
+    #define ID_STATUS_BAR 2040
+    #define ID_EDITOR_LIST 3001
+    #define ID_EDITOR_DRAWABLE 3010
+    #define ID_EDITOR_TEXTURE 3011
+    #define ID_EDITOR_PALETTE 3012
+    #define ID_BTN_EDITOR_APPLY 3020
+    #define ID_BTN_EDITOR_RESET 3021
+    #define ID_BTN_EDITOR_SAVE 3022
+    #define ID_MEMORY_LIST 4001
+    #define ID_BTN_ATTACH_GAME 4010
+    #define ID_BTN_READ_OUTFIT 4011
+    #define ID_BTN_WRITE_OUTFIT 4012
+    #define ID_BTN_BACKUP_OUTFIT 4013
+    #define ID_EDIT_MEMORY_STATUS 4020
 
     // ============== APPLICATION MANAGER ==============
     class Application {
@@ -16,14 +68,12 @@ namespace OutfitConverter {
         std::unique_ptr<MemoryEditor> memoryEditor;
         HINSTANCE hInstance;
         
-        // Current loaded outfit (using YimOutfit as intermediate format)
         YimOutfit currentOutfit;
         std::string currentFilePath;
         FormatConverter::FormatType currentFormat;
         bool outfitLoaded;
         bool memoryAttached;
 
-        // UI State
         HWND mainWindow;
         HWND sourcePathEdit;
         HWND targetPathEdit;
@@ -32,7 +82,6 @@ namespace OutfitConverter {
         HWND componentList;
         HWND statusBar;
 
-        // Private methods
         void InitializeUI();
         void SetupEventHandlers();
         void UpdateUIState();
@@ -46,7 +95,6 @@ namespace OutfitConverter {
         void ShowError(const std::wstring& message);
         void ShowSuccess(const std::wstring& message);
         
-        // Conversion helpers
         std::string WStringToString(const std::wstring& wstr);
         std::wstring StringToWString(const std::string& str);
 
@@ -58,7 +106,6 @@ namespace OutfitConverter {
         int Run();
         void Shutdown();
 
-        // Public interface for UI callbacks
         void OnFileOpen();
         void OnFileSave();
         void OnConvert(FormatConverter::FormatType sourceFormat, 
@@ -69,98 +116,9 @@ namespace OutfitConverter {
         void OnOpenEditor();
         void OnAbout();
 
-        // Getters
         HWND GetMainWindow() const { return mainWindow; }
         bool IsOutfitLoaded() const { return outfitLoaded; }
         bool IsMemoryAttached() const { return memoryAttached; }
     };
-
-    // ============== EDITOR WINDOW ==============
-    class EditorWindow {
-    private:
-        HWND editorWindow;
-        HWND componentList;
-        HWND drawableEdit;
-        HWND textureEdit;
-        HWND paletteEdit;
-        HINSTANCE hInstance;
-        
-        YimOutfit* workingOutfit;
-        int selectedComponent;
-        
-        static LRESULT CALLBACK EditorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-        void CreateControls();
-        void PopulateComponentList();
-        void UpdateComponentControls();
-        void ApplyChanges();
-        void ResetComponent();
-
-    public:
-        EditorWindow(HINSTANCE hInst);
-        ~EditorWindow();
-
-        bool Create(HWND parent, YimOutfit* outfit);
-        void Show();
-        void Hide();
-        bool IsVisible() const;
-        HWND GetHandle() const { return editorWindow; }
-    };
-
-    // ============== MEMORY VIEWER WINDOW ==============
-    class MemoryViewerWindow {
-    private:
-        HWND viewerWindow;
-        HWND memoryList;
-        HWND statusEdit;
-        HINSTANCE hInstance;
-        
-        MemoryEditor* memoryEditor;
-        
-        static LRESULT CALLBACK ViewerProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-        void CreateControls();
-        void RefreshMemoryView();
-        void UpdateStatus(const std::wstring& status);
-
-    public:
-        MemoryViewerWindow(HINSTANCE hInst);
-        ~MemoryViewerWindow();
-
-        bool Create(HWND parent, MemoryEditor* editor);
-        void Show();
-        void Hide();
-        bool IsVisible() const;
-        HWND GetHandle() const { return viewerWindow; }
-    };
-
-    // ============== CONVERSION DIALOG ==============
-    class ConversionDialog {
-    private:
-        static FormatConverter::FormatType sourceFormat;
-        static FormatConverter::FormatType targetFormat;
-        static std::wstring sourcePath;
-        static std::wstring targetPath;
-        
-        static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-        static void OnBrowseSource(HWND hwnd);
-        static void OnBrowseTarget(HWND hwnd);
-        static void OnConvert(HWND hwnd);
-        static const wchar_t* GetFormatFilter(FormatConverter::FormatType format);
-
-    public:
-        static bool Show(HWND parent);
-        static bool GetResult(std::wstring& outSourcePath, std::wstring& outTargetPath,
-                             FormatConverter::FormatType& outSourceFormat,
-                             FormatConverter::FormatType& outTargetFormat);
-    };
-
-    // ============== UTILITY FUNCTIONS ==============
-    namespace Utils {
-        std::string GetComponentName(int slot);
-        std::string GetPropName(int slot);
-        std::wstring FormatToString(FormatConverter::FormatType format);
-        FormatConverter::FormatType StringToFormat(const std::wstring& str);
-        bool ValidateOutfitData(const YimOutfit& outfit);
-        std::wstring GetLastErrorString();
-    }
 
 } // namespace OutfitConverter
