@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "UIManager.h"
 #include <sstream>
 #include <codecvt>
 #include <locale>
